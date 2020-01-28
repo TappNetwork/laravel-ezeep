@@ -9,22 +9,33 @@ class EzeepApiClient implements ApiClient
 {
     private $client;
 
-    public function __construct($client_id, $client_secret, Client $client = null)
+    public function __construct($config, Client $client = null)
     {
-        $access_token = "";
+        $secret = base64_encode("{$config['client_id']}:{$config['client_secret']}");
 
-        $this->client = $client ?? $this->buildClient($access_token);
+        $this->client = $client ?? $this->buildClient($access_token, $config);
     }
 
-    private function buildClient($access_token)
+    private function buildClient($secret, $config)
     {
-        return new Client([
-            'base_uri' => '',
+        $client = new Client([
+            'base_uri' => 'https://accounts.ezeep.com',
             'headers' => [
-                'Authorization' => "",
-                'content-type' => 'application/json',
+                'Authorization' => "Basic $secret",
+                'content-type' => 'application/x-www-form-urlencoded',
             ],
         ]);
+
+        $res = $client->request("POST", "/oauth/access_token", [
+            'form_params' => [
+                'grant_type' => 'password',
+                'username' => $config['client_username'],
+                'password' => $config['client_password'],
+                'scope=printjobs:read printjobs:write hosts:read hosts:write printers:read printers:write documents:read documents:write documents:print documents:print:free identity:read identity:write',
+            ],
+        ]);
+
+        dd($res->getBody()->getContents());
     }
 
     public function get(?string $id = null)

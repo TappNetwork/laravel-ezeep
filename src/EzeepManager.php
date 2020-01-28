@@ -24,11 +24,7 @@ class EzeepManager
 
     protected function createEzeep($config)
     {
-        $client_id = $config['client_id'];
-        $client_secret = $config['client_secret'];
-
-        $client = new EzeepApiClient($client_id, $client_secret);
-        dd($client);
+        $client = new EzeepApiClient($config);
 
         return new Ezeep($client);
     }
