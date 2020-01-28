@@ -4,5 +4,15 @@ namespace Tapp\Ezeep;
 
 class Ezeep
 {
-    // Build your next great package.
+    private $api;
+
+    public function __construct($client)
+    {
+        $this->api = $client;
+    }
+
+    public function hello()
+    {
+        return 'hello';
+    }
 }

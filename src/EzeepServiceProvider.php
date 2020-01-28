@@ -53,8 +53,8 @@ class EzeepServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'ezeep');
 
         // Register the main class to use with the facade
-        $this->app->singleton('ezeep', function () {
-            return new Ezeep;
+        $this->app->singleton('ezeep', function ($app) {
+            return new EzeepManager($app);
         });
     }
 }

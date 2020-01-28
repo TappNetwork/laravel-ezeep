@@ -47,7 +47,7 @@
                 "Tapp\\Ezeep\\EzeepServiceProvider"
             ],
             "aliases": {
-                "Ezeep": "Tapp\\Ezeep\\EzeepFacade"
+                "Ezeep": "Tapp\\Ezeep\\Facades\\EzeepFacade"
             }
         }
     }

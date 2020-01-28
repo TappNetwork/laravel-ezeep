@@ -1,6 +1,6 @@
 <?php
 
-namespace Tapp\Ezeep;
+namespace Tapp\Ezeep\Facades;
 
 use Illuminate\Support\Facades\Facade;
 
