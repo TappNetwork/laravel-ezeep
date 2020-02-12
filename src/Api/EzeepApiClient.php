@@ -8,12 +8,13 @@ use Illuminate\Support\Str;
 class EzeepApiClient implements ApiClient
 {
     private $client;
+    private $token;
 
     public function __construct($config, Client $client = null)
     {
         $secret = base64_encode("{$config['client_id']}:{$config['client_secret']}");
 
-        $this->client = $client ?? $this->buildClient($access_token, $config);
+        $this->client = $client ?? $this->buildClient($secret, $config);
     }
 
     private function buildClient($secret, $config)
@@ -35,7 +36,9 @@ class EzeepApiClient implements ApiClient
             ],
         ]);
 
-        dd($res->getBody()->getContents());
+        $response = json_decode($res->getBody()->getContents());
+
+        $this->token = $response->access_token;
     }
 
     public function get(?string $id = null)
