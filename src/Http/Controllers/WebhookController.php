@@ -8,12 +8,8 @@ use Illuminate\Routing\Controller;
 
 class WebhookController extends Controller
 {
-    public function handleOrgWebhook($organization, Request $request)
+    public function handleOrganizationWebhook(Request $request)
     {
-
-    }
-
-    public function registerOrgWebhook($organization, Request $request)
-    {
+        \Log::info($request->all());
     }
 }

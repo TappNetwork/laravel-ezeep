@@ -11,8 +11,8 @@ class Ezeep
         $this->api = $client;
     }
 
-    public function hello()
+    public function getAccessToken()
     {
-        return 'hello';
+        return $this->api->token;
     }
 }

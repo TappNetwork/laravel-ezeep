@@ -1,5 +1,3 @@
 <?php
 
-Route::post('organization/{organization}', 'WebhookController@registerOrgWebhook');
-
-Route::get('organization/{organization}', 'WebhookController@handleOrgWebhook');
+Route::post('webhook', 'WebhookController@handleOrganizationWebhook');
