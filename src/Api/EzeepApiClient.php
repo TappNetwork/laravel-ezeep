@@ -5,24 +5,36 @@ namespace Tapp\Ezeep\Api;
 use GuzzleHttp\Client;
 use Illuminate\Support\Str;
 
-class EzeepApiClient implements ApiClient
+class EzeepApiClient
 {
-    private $client;
     private $token;
+    private $secret;
+    private $url;
+    private $organization;
+    private $username;
+    private $password;
 
     public function __construct($config, Client $client = null)
     {
-        $secret = base64_encode("{$config['client_id']}:{$config['client_secret']}");
+        $this->username = $config['client_username'];
 
-        $this->client = $client ?? $this->buildClient($secret, $config);
+        $this->password = $config['client_password'];
+
+        $this->secret = base64_encode("{$config['client_id']}:{$config['client_secret']}");
+
+        $this->token = $this->getAccessToken();
+
+        $this->url = $config['api_url'];
+
+        $this->organization = $this->getOrganization();
     }
 
-    private function buildClient($secret, $config)
+    private function getAccessToken()
     {
         $client = new Client([
             'base_uri' => 'https://accounts.ezeep.com',
             'headers' => [
-                'Authorization' => "Basic $secret",
+                'Authorization' => "Basic $this->secret",
                 'content-type' => 'application/x-www-form-urlencoded',
             ],
         ]);
@@ -30,93 +42,35 @@ class EzeepApiClient implements ApiClient
         $res = $client->request("POST", "/oauth/access_token", [
             'form_params' => [
                 'grant_type' => 'password',
-                'username' => $config['client_username'],
-                'password' => $config['client_password'],
+                'username' => $this->username,
+                'password' => $this->password,
                 'scope=printjobs:read printjobs:write hosts:read hosts:write printers:read printers:write documents:read documents:write documents:print documents:print:free identity:read identity:write',
             ],
         ]);
 
-        $response = json_decode($res->getBody()->getContents());
-
-        $this->token = $response->access_token;
+        return json_decode($res->getBody()->getContents())->access_token;
     }
 
-    public function get(?string $id = null)
-    {
-        $url = $this->getEndpointUrl($id);
+    public function getOrganization()
+	{
+        $client = new Client([
+            'base_uri' => "https://accounts.ezeep.com/api/",
+            'headers' => [
+                'Authorization' => "Basic $this->secret",
+                'content-type' => 'application/x-www-form-urlencoded',
+            ],
+        ]);
 
-        return $this->decodeResponse($this->client->get($url));
-    }
+        $res = $client->request("GET", "organizations", [
+            'form_params' => [
+                'grant_type' => 'password',
+                'username' => $this->username,
+                'password' => $this->password,
+                'scope=printjobs:read printjobs:write hosts:read hosts:write printers:read printers:write documents:read documents:write documents:print documents:print:free identity:read identity:write',
+            ],
+        ]);
 
-    public function post($contents = null)
-    {
-        $url = $this->getEndpointUrl();
 
-        $params = ['json' => ['fields' => (object) $contents]];
-
-        return $this->decodeResponse($this->client->post($url, $params));
-    }
-
-    public function put(string $id, $contents = null)
-    {
-        $url = $this->getEndpointUrl($id);
-
-        $params = ['json' => ['fields' => (object) $contents]];
-
-        return $this->decodeResponse($this->client->put($url, $params));
-    }
-
-    public function patch(string $id, $contents = null)
-    {
-        $url = $this->getEndpointUrl($id);
-
-        $params = ['json' => ['fields' => (object) $contents]];
-
-        return $this->decodeResponse($this->client->patch($url, $params));
-    }
-
-    public function delete(string $id)
-    {
-        $url = $this->getEndpointUrl($id);
-
-        return $this->decodeResponse($this->client->delete($url));
-    }
-
-    public function responseToJson($response)
-    {
-        $body = (string) $response->getBody();
-
-        return $body;
-    }
-
-    public function responseToCollection($response)
-    {
-        $body = (string) $response->getBody();
-
-        if ($body === '') {
-            return collect([]);
-        }
-
-        $object = json_decode($body);
-
-        return isset($object->records) ? collect($object->records) : $object;
-    }
-
-    public function decodeResponse($response)
-    {
-        $body = (string) $response->getBody();
-
-        if ($body === '') {
-            return [];
-        }
-
-        return json_decode($body, true);
-    }
-
-    protected function getEndpointUrl(?string $id = null): string
-    {
-        $url = '';
-
-        return $url;
-    }
+        dd(json_decode($res->getBody()->getContents()));
+	}
 }
